@@ -13,7 +13,3 @@ func Package(resource string) string {
 func Object(resource string) string {
 	return strings.TrimLeft(path.Ext(resource), ".")
 }
-
-func Validate(resource string) bool {
-	return Object(resource) != ""
-}
