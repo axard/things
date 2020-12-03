@@ -19,6 +19,7 @@ func TestHookTemplate_Execute(t *testing.T) {
 					"io",
 				},
 				InterfaceName: "Callback",
+				HookName:      "Hook",
 				PackageName:   "cbhook",
 				MethodName:    "Call",
 				MethodDeclArgs: []string{
@@ -82,6 +83,7 @@ func (this *Hook) Call(arg1 io.Writer, arg2 ...interface{}) {
 					"io",
 				},
 				InterfaceName: "Callback",
+				HookName:      "Hook",
 				PackageName:   "cbhook",
 				MethodName:    "Call",
 				MethodDeclArgs: []string{

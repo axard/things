@@ -16,12 +16,12 @@ import (
     {{- range .Imports }}
     "{{.}}"
     {{- end }}
-    {{- with .importSync}}
+    {{- with .Safe}}
     "sync"
     {{- end}}
 )
 
-type Hook struct {
+type {{.HookName}} struct {
     list []*hookedItem
     {{- with .Safe}}
     m sync.Mutex
@@ -34,7 +34,7 @@ type hooked struct {
 
 type Cancel = func()
 
-func (this *Hook) Append(item {{.InterfaceName}}) Cancel {
+func (this *{{.HookName}}) Append(item {{.InterfaceName}}) Cancel {
     {{with .Safe -}}
     this.m.Lock()
     defer this.m.Unlock()
@@ -46,7 +46,7 @@ func (this *Hook) Append(item {{.InterfaceName}}) Cancel {
     return func() { this.remove(hooked) }
 }
 
-func (this *Hook) remove(hooked *hooked) {
+func (this *{{.HookName}}) remove(hooked *hooked) {
     {{with .Safe -}}
     this.m.Lock()
     defer this.m.Unlock()
@@ -60,7 +60,7 @@ func (this *Hook) remove(hooked *hooked) {
     }
 }
 
-func (this *Hook) {{.MethodName}}({{join .MethodDeclArgs ", "}}) {
+func (this *{{.HookName}}) {{.MethodName}}({{join .MethodDeclArgs ", "}}) {
     {{with .Safe -}}
     this.m.Lock()
     defer this.m.Unlock()
@@ -75,6 +75,7 @@ func (this *Hook) {{.MethodName}}({{join .MethodDeclArgs ", "}}) {
 type HookTemplate struct {
 	Imports        []string
 	InterfaceName  string
+	HookName       string
 	PackageName    string
 	MethodName     string
 	MethodDeclArgs []string
