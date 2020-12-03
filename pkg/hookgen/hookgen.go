@@ -25,7 +25,7 @@ func (this *Hookgen) Generate(w io.Writer, i *types.Interface) error {
 		Imports:        this.methodImports(i),
 		InterfaceName:  this.interfaceName(resource.Object(this.Src)),
 		HookName:       this.hookName(resource.Object(this.Dst)),
-		PackageName:    path.Base(resource.Package(this.Dst)),
+		PackageName:    this.packageName(i.Method(0).Pkg().Name()),
 		MethodName:     this.methodName(i),
 		MethodDeclArgs: this.methodDeclArgs(i),
 		MethodCallArgs: this.methodCallArgs(i),
@@ -79,6 +79,17 @@ func (this *Hookgen) hookName(name string) string {
 	}
 
 	return name
+}
+
+func (this *Hookgen) packageName(name string) string {
+	srcPkgName := path.Base(resource.Package(this.Src))
+	dstPkgName := path.Base(resource.Package(this.Dst))
+
+	if (srcPkgName == dstPkgName) && (name == "main") {
+		return name
+	}
+
+	return dstPkgName
 }
 
 func (this *Hookgen) methodName(iface *types.Interface) string {
