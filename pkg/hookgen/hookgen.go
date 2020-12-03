@@ -55,19 +55,22 @@ func (this *Hookgen) Generate(w io.Writer, i *types.Interface) error {
 type formatterFunc func([]byte) ([]byte, error)
 
 func (this *Hookgen) formatter() formatterFunc {
-	if this.Formatter == "goimports" {
+	switch this.Formatter {
+	case "goimports":
 		return formatter.Goimports
+	case "noop":
+		return formatter.Nofmt
+	default:
+		return formatter.Gofmt
 	}
-
-	return formatter.Gofmt
 }
 
 func (this *Hookgen) interfaceName(name string) string {
-	if this.Src == this.Dst {
+	if resource.Package(this.Src) == resource.Package(this.Dst) {
 		return name
 	}
 
-	return path.Base(this.Src) + "." + name
+	return path.Base(resource.Package(this.Src)) + "." + name
 }
 
 func (this *Hookgen) hookName(name string) string {
@@ -151,18 +154,27 @@ func (this *Hookgen) methodCallArgs(iface *types.Interface) []string {
 }
 
 func (this *Hookgen) methodImports(iface *types.Interface) []string {
-	imports := []string{}
+	importsMap := map[string]struct{}{}
+	meth := iface.Method(0)
+	sign := meth.Type().(*types.Signature)
+	prms := sign.Params()
+
+	if resource.Package(this.Src) != resource.Package(this.Dst) {
+		importsMap[meth.Pkg().Path()] = struct{}{}
+	}
 
 	qualifier := func(p *types.Package) string {
-		imports = append(imports, p.Path())
+		importsMap[p.Path()] = struct{}{}
 		return ""
 	}
 
-	sign := iface.Method(0).Type().(*types.Signature)
-	prms := sign.Params()
-
 	for i := 0; i < prms.Len(); i++ {
 		types.TypeString(prms.At(i).Type(), qualifier)
+	}
+
+	imports := make([]string, 0, len(importsMap))
+	for i := range importsMap {
+		imports = append(imports, i)
 	}
 
 	return imports
