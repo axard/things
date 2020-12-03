@@ -22,7 +22,7 @@ import (
 )
 
 type {{.HookName}} struct {
-    list []*hookedItem
+    list []*hooked
     {{- with .Safe}}
     m sync.Mutex
     {{- end}}
